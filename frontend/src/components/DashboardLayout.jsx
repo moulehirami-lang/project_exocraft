@@ -3,14 +3,19 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import logo from "../assets/exocraft-logo.png";
 
-const menuItems = [
-  { path: "/dashboard", page: "dashboard", icon: "▣", label: "Tableau de bord" },
-  { path: "/archives", page: "archives", icon: "▧", label: "Archives" },
-];
-
 function DashboardLayout({ children, activePage, groups = [], selectedGroup = null, onSelectGroup }) {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+
+  const baseItems = [
+    { path: '/dashboard', page: 'dashboard', icon: '▣', label: 'Tableau de bord' },
+    { path: '/ai',        page: 'ai',        icon: '✨', label: 'Assistant IA' },
+    { path: '/quiz',      page: 'quiz',      icon: '☑', label: 'Mes Exercices' },
+    { path: '/contents',  page: 'contents',  icon: '📚', label: 'Mes Cours' },
+    { path: '/archives',  page: 'archives',  icon: '▧', label: 'Archives' },
+  ];
+  const adminItem = { path: '/admin', page: 'admin', icon: '⚙', label: 'Administration' };
+  const menuItems = user?.role === 'administrateur' ? [...baseItems, adminItem] : baseItems;
   const [menuOpen, setMenuOpen] = useState(false);
   const menuButton = useRef(null);
 
@@ -91,7 +96,7 @@ function DashboardLayout({ children, activePage, groups = [], selectedGroup = nu
           </div>
           <div className="dashboard-user">
             <div className="dashboard-user-info">
-              <span className="dashboard-user-label">ESPACE ENSEIGNANT</span>
+              <span className="dashboard-user-label">{user?.role === 'administrateur' ? 'ADMINISTRATEUR' : 'ESPACE ENSEIGNANT'}</span>
               <span className="dashboard-user-email" title={user?.email}>
                 {user?.email || "Utilisateur"}
               </span>

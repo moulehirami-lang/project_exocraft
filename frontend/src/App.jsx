@@ -4,7 +4,6 @@ import Home from "./pages/home";
 import Login from "./pages/Login";
 import Register from "./pages/register";
 import Dashboard from "./pages/Dashboard";
-import Archives from "./pages/Archives";
 import Settings from "./pages/Settings";
 import AiGenerator from "./pages/AiGenerator";
 import QuizManager from "./pages/QuizManager";
@@ -29,7 +28,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/archives" element={<ProtectedRoute><Archives /></ProtectedRoute>} />
+        <Route path="/archives" element={<ProtectedRoute><ArchivesAdmin /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/ai" element={<ProtectedRoute><AiGenerator /></ProtectedRoute>} />
         <Route path="/quiz" element={<ProtectedRoute><QuizManager /></ProtectedRoute>} />

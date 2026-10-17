@@ -7,224 +7,109 @@ function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError]       = useState("");
+  const [loading, setLoading]   = useState(false);
 
-  const [error, setError] = useState("");
-
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-
     setError("");
 
     if (!email.trim() || !password.trim()) {
-      setError(
-        "Veuillez renseigner votre adresse email et votre mot de passe."
-      );
+      setError("Veuillez renseigner votre adresse email et votre mot de passe.");
       return;
     }
 
-    /*
-      TEMPORAIRE POUR LE FRONTEND
-
-      Le backend prendra ensuite en charge :
-      - la vérification du mot de passe
-      - bcrypt
-      - JWT
-      - le rôle de l'utilisateur
-    */
-
-    let savedProfile = null;
+    setLoading(true);
     try {
-      const profile = JSON.parse(localStorage.getItem("exocraft_profile") || "null");
-      if (profile?.email?.toLowerCase() === email.trim().toLowerCase()) savedProfile = profile;
-    } catch {
-      savedProfile = null;
+      await login({ email: email.trim(), password });
+      navigate("/dashboard");
+    } catch (err) {
+      setError(err.message || "Email ou mot de passe incorrect.");
+    } finally {
+      setLoading(false);
     }
-    const userData = savedProfile || { email: email.trim() };
-
-    login(userData);
-
-    navigate("/dashboard");
   };
 
   return (
     <div className="auth-page">
 
-      {/* =====================================================
-          HEADER
-      ===================================================== */}
-
       <header className="auth-header">
-
         <Link to="/" className="auth-logo-link">
-          <img
-            src={logo}
-            alt="ExoCraft"
-            className="auth-logo"
-          />
+          <img src={logo} alt="ExoCraft" className="auth-logo" />
         </Link>
-
         <div className="auth-header-text">
           <span>Pas encore de compte ?</span>
-
-          <Link to="/register">
-            Créer un compte
-          </Link>
+          <Link to="/register">Créer un compte</Link>
         </div>
-
       </header>
 
-      {/* =====================================================
-          LOGIN
-      ===================================================== */}
-
       <main className="auth-main">
-
         <div className="auth-container">
 
-          {/* =================================================
-              HEADING
-          ================================================= */}
-
           <div className="auth-heading">
-
-            <span className="auth-eyebrow">
-              ESPACE ENSEIGNANT
-            </span>
-
-            <h1>
-              Bon retour sur ExoCraft
-            </h1>
-
-            <p>
-              Connectez-vous pour accéder à vos contenus
-              pédagogiques et continuer votre travail.
-            </p>
-
+            <span className="auth-eyebrow">ESPACE ENSEIGNANT</span>
+            <h1>Bon retour sur ExoCraft</h1>
+            <p>Connectez-vous pour accéder à vos contenus pédagogiques et continuer votre travail.</p>
           </div>
 
-          {/* =================================================
-              FORM
-          ================================================= */}
-
-          <form
-            className="auth-form"
-            onSubmit={handleSubmit}
-          >
-
-            {/* EMAIL */}
+          <form className="auth-form" onSubmit={handleSubmit}>
 
             <div className="form-group">
-
-              <label htmlFor="email">
-                Adresse email
-              </label>
-
+              <label htmlFor="email">Adresse email</label>
               <input
                 type="email"
                 id="email"
                 value={email}
                 placeholder="exemple@email.com"
-                onChange={(event) =>
-                  setEmail(event.target.value)
-                }
+                onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
                 required
               />
-
             </div>
 
-            {/* PASSWORD */}
-
             <div className="form-group">
-
-              <label htmlFor="password">
-                Mot de passe
-              </label>
-
+              <label htmlFor="password">Mot de passe</label>
               <input
                 type="password"
                 id="password"
                 value={password}
                 placeholder="Votre mot de passe"
-                onChange={(event) =>
-                  setPassword(event.target.value)
-                }
+                onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
                 required
               />
-
-              {/* MOT DE PASSE OUBLIE */}
-
               <button
                 type="button"
                 className="forgot-password"
-                onClick={() =>
-                  alert(
-                    "La récupération du mot de passe sera disponible avec le backend."
-                  )
-                }
+                onClick={() => alert("La récupération du mot de passe sera disponible prochainement.")}
               >
                 Mot de passe oublié ?
               </button>
-
             </div>
 
-            {/* ERROR */}
+            {error && <div className="auth-error" role="alert">{error}</div>}
 
-            {error && (
-              <div className="auth-error">
-                {error}
-              </div>
-            )}
-
-            {/* SUBMIT */}
-
-            <button
-              type="submit"
-              className="auth-button"
-            >
-              <span>Se connecter</span>
-              <span>→</span>
+            <button type="submit" className="auth-button" disabled={loading}>
+              <span>{loading ? "Connexion..." : "Se connecter"}</span>
+              {!loading && <span>→</span>}
             </button>
 
           </form>
 
-          {/* =================================================
-              REGISTER
-          ================================================= */}
-
           <div className="auth-bottom">
-
-            <span>
-              Vous n'avez pas encore de compte ?
-            </span>
-
-            <Link to="/register">
-              Créer un compte
-            </Link>
-
+            <span>Vous n'avez pas encore de compte ?</span>
+            <Link to="/register">Créer un compte</Link>
           </div>
 
-          {/* =================================================
-              SECURITY
-          ================================================= */}
-
           <div className="auth-security">
-
             <span>🔒</span>
-
-            <p>
-              Vos informations de connexion sont protégées.
-            </p>
-
+            <p>Vos informations de connexion sont protégées.</p>
           </div>
 
         </div>
-
       </main>
-
     </div>
   );
 }

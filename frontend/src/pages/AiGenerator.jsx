@@ -217,7 +217,12 @@ function AiGeneratorForm() {
     try {
       const titre = `${form.type.charAt(0).toUpperCase() + form.type.slice(1)} — ${form.theme}`;
       await aiApi.save({ titre, type: form.type, matiere: form.matiere, theme: form.theme, contenu: editedContent });
-      setSuccess("✓ Contenu sauvegardé en brouillon.");
+      const isQuizType = ["quiz", "serie", "examen"].includes(form.type);
+      setSuccess(
+        isQuizType
+          ? "✓ Sauvegardé en brouillon. Retrouvez-le dans \"Mes Exercices\"."
+          : "✓ Sauvegardé en brouillon. Retrouvez-le dans \"Mes Cours\"."
+      );
     } catch (err) { setError(err.message); }
     finally { setSaving(false); }
   };
@@ -228,9 +233,13 @@ function AiGeneratorForm() {
     setSaving(true); setError(""); setSuccess("");
     try {
       const titre = `${form.type.charAt(0).toUpperCase() + form.type.slice(1)} — ${form.theme}`;
-      const saved = await aiApi.save({ titre, type: form.type, matiere: form.matiere, theme: form.theme, contenu: editedContent });
-      await aiApi.valider(saved.id);
-      setSuccess("✓ Contenu validé et enregistré !");
+      await aiApi.save({ titre, type: form.type, matiere: form.matiere, theme: form.theme, contenu: editedContent });
+      const isQuizType = ["quiz", "serie", "examen"].includes(form.type);
+      setSuccess(
+        isQuizType
+          ? "✓ Enregistré dans \"Mes Exercices\" ! Vous pouvez y ajouter des questions."
+          : "✓ Enregistré dans \"Mes Cours\" ! Vous pouvez le valider depuis là-bas."
+      );
     } catch (err) { setError(err.message); }
     finally { setSaving(false); }
   };
@@ -346,11 +355,23 @@ function AiGeneratorForm() {
               {saving ? "Sauvegarde..." : "💾 Sauvegarder en brouillon"}
             </button>
             <button className="workspace-button" onClick={handleValidate} disabled={saving}>
-              {saving ? "Validation..." : "✓ Valider et enregistrer"}
+              {saving ? "Enregistrement..." : (
+                ["quiz", "serie", "examen"].includes(form.type)
+                  ? "✓ Enregistrer dans Mes Quiz"
+                  : "✓ Enregistrer dans Mes Contenus"
+              )}
             </button>
           </div>
 
-          {success && <p className="workspace-notice" role="status">{success}</p>}
+          {success && (
+            <div className="workspace-notice" role="status">
+              <p>{success}</p>
+              {["quiz", "serie", "examen"].includes(form.type)
+                ? <a href="/quiz" className="workspace-button secondary" style={{display:"inline-block",marginTop:"8px"}}>→ Aller à Mes Exercices</a>
+                : <a href="/contents" className="workspace-button secondary" style={{display:"inline-block",marginTop:"8px"}}>→ Aller à Mes Cours</a>
+              }
+            </div>
+          )}
         </div>
       )}
     </section>
