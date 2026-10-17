@@ -36,10 +36,8 @@ export class ExportService {
   async exportContentPdf(id: number): Promise<Buffer> {
     const content = this.contentService.findOne(id);
 
-    if (content.statut !== 'valide') {
-      throw new BadRequestException(
-        'Seul un contenu validé peut être exporté',
-      );
+    if (!content.contenu || content.contenu.trim().length === 0) {
+      throw new BadRequestException('Impossible d\'exporter un contenu vide');
     }
 
     return new Promise((resolve, reject) => {
@@ -83,8 +81,8 @@ export class ExportService {
   async exportQuizPdf(id: number, avecCorrige = false): Promise<Buffer> {
     const quiz = this.quizService.findOne(id);
 
-    if (quiz.statut !== 'valide') {
-      throw new BadRequestException('Seul un quiz validé peut être exporté');
+    if (quiz.questions.length === 0) {
+      throw new BadRequestException('Impossible d\'exporter un quiz sans questions');
     }
 
     return new Promise((resolve, reject) => {
@@ -139,8 +137,8 @@ export class ExportService {
   async exportContentWord(id: number): Promise<Buffer> {
     const content = this.contentService.findOne(id);
 
-    if (content.statut !== 'valide') {
-      throw new BadRequestException('Seul un contenu validé peut être exporté');
+    if (!content.contenu || content.contenu.trim().length === 0) {
+      throw new BadRequestException('Impossible d\'exporter un contenu vide');
     }
 
     const lignes = content.contenu.split('\n');
@@ -186,8 +184,8 @@ export class ExportService {
   async exportQuizWord(id: number, avecCorrige = false): Promise<Buffer> {
     const quiz = this.quizService.findOne(id);
 
-    if (quiz.statut !== 'valide') {
-      throw new BadRequestException('Seul un quiz validé peut être exporté');
+    if (quiz.questions.length === 0) {
+      throw new BadRequestException('Impossible d\'exporter un quiz sans questions');
     }
 
     const paragraphs: Paragraph[] = [];

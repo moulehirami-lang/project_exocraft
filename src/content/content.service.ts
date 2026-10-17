@@ -31,6 +31,7 @@ export class ContentService {
       auteurId: dto.auteurId,
       dateCreation: new Date(),
       dateModification: new Date(),
+      archived: false,
     };
     this.contents.push(newContent);
     return newContent;
@@ -63,9 +64,9 @@ export class ContentService {
     return this.findAll({ ...filters, visibilite: 'public', statut: 'valide' });
   }
 
-  // Contenus d'un enseignant spécifique
+  // Contenus d'un enseignant spécifique (hors archivés)
   findByAuteur(auteurId: number, filters: FilterContentDto): { data: Content[]; total: number; page: number; limit: number } {
-    let result = this.contents.filter((c) => c.auteurId === auteurId);
+    let result = this.contents.filter((c) => c.auteurId === auteurId && !c.archived);
 
     if (filters.type)       result = result.filter((c) => c.type === filters.type);
     if (filters.matiere)    result = result.filter((c) => c.matiere.toLowerCase().includes(filters.matiere!.toLowerCase()));
@@ -159,6 +160,42 @@ export class ContentService {
     };
     this.contents.push(copie);
     return copie;
+  }
+
+  // ─────────────────────────────────────────────────────
+  // ARCHIVAGE
+  // ─────────────────────────────────────────────────────
+
+  archiver(id: number, auteurId: number): Content {
+    const content = this.findOne(id);
+    this.checkOwnership(content, auteurId);
+    content.archived = true;
+    content.archivedAt = new Date();
+    content.dateModification = new Date();
+    return content;
+  }
+
+  desarchiver(id: number, auteurId: number): Content {
+    const content = this.findOne(id);
+    this.checkOwnership(content, auteurId);
+    content.archived = false;
+    content.archivedAt = undefined;
+    content.dateModification = new Date();
+    return content;
+  }
+
+  findArchived(auteurId: number, filters: FilterContentDto): { data: Content[]; total: number; page: number; limit: number } {
+    let result = this.contents.filter((c) => c.auteurId === auteurId && c.archived);
+
+    if (filters.type)    result = result.filter((c) => c.type === filters.type);
+    if (filters.matiere) result = result.filter((c) => c.matiere.toLowerCase().includes(filters.matiere!.toLowerCase()));
+
+    const total = result.length;
+    const page  = filters.page  ?? 1;
+    const limit = filters.limit ?? 10;
+    const start = (page - 1) * limit;
+
+    return { data: result.slice(start, start + limit), total, page, limit };
   }
 
   // ─────────────────────────────────────────────────────
